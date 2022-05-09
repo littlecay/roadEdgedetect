@@ -124,21 +124,24 @@ def main():
         os.makedirs(opts.save_val_results_to, exist_ok=True)
 
     src_video = cv2.VideoCapture('37b49c1476b7cf8b9f178ff65da433fc.mp4')
+    fps = src_video.get(cv2.CAP_PROP_FPS)
+    size = (int(src_video.get(cv2.CAP_PROP_FRAME_WIDTH)),
+            int(src_video.get(cv2.CAP_PROP_FRAME_HEIGHT)))
+    fNUMS = src_video.get(cv2.CAP_PROP_FRAME_COUNT)
+
+
 
     with torch.no_grad():
         model = model.eval()
-        for img_path in tqdm(image_files):
-            ext = os.path.basename(img_path).split('.')[-1]
-            img_name = os.path.basename(img_path)[:-len(ext)-1]
-            img = Image.open(img_path).convert('RGB')
-            img = transform(img).unsqueeze(0) # To tensor of NCHW
+        while 1:
+            _, frame = src_video.read()
+            if frame is None:
+                break
+            img = transform(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)).unsqueeze(0) # To tensor of NCHW
             img = img.to(device)
-            
+
             pred = model(img).max(1)[1].cpu().numpy()[0] # HW
             colorized_preds = decode_fn(pred).astype('uint8')
-            colorized_preds = Image.fromarray(colorized_preds)
-            if opts.save_val_results_to:
-                colorized_preds.save(os.path.join(opts.save_val_results_to, img_name+'.png'))
 
 if __name__ == '__main__':
     main()
