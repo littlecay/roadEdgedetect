@@ -6,6 +6,7 @@ import os
 import random
 import argparse
 import numpy as np
+import cv2
 
 from torch.utils import data
 from datasets import VOCSegmentation, Cityscapes, cityscapes
@@ -35,9 +36,9 @@ def get_argparser():
                               network.modeling.__dict__[name])
                               )
 
-    parser.add_argument("--model", type=str, default='deeplabv3plus_mobilenet',
+    parser.add_argument("--model", type=str, default='deeplabv3plus_resnet101',
                         choices=available_models, help='model name')
-    parser.add_argument("--separable_conv", action='store_true', default=False,
+    parser.add_argument("--separable_conv", action='store_true', default=True,
                         help="apply separable conv to decoder and aspp")
     parser.add_argument("--output_stride", type=int, default=16, choices=[8, 16])
 
@@ -47,12 +48,12 @@ def get_argparser():
 
     parser.add_argument("--crop_val", action='store_true', default=False,
                         help='crop validation (default: False)')
-    parser.add_argument("--val_batch_size", type=int, default=4,
+    parser.add_argument("--val_batch_size", type=int, default=1,
                         help='batch size for validation (default: 4)')
     parser.add_argument("--crop_size", type=int, default=513)
 
     
-    parser.add_argument("--ckpt", default=None, type=str,
+    parser.add_argument("--ckpt", default='./checkpoints/best/best_deeplabv3plus_resnet50_UAS_os16.pth', type=str,
                         help="resume from checkpoint")
     parser.add_argument("--gpu_id", type=str, default='0',
                         help="GPU ID")
@@ -121,6 +122,9 @@ def main():
             ])
     if opts.save_val_results_to is not None:
         os.makedirs(opts.save_val_results_to, exist_ok=True)
+
+    src_video = cv2.VideoCapture('37b49c1476b7cf8b9f178ff65da433fc.mp4')
+
     with torch.no_grad():
         model = model.eval()
         for img_path in tqdm(image_files):
