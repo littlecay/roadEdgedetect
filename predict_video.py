@@ -127,9 +127,13 @@ def main():
     fps = src_video.get(cv2.CAP_PROP_FPS)
     size = (int(src_video.get(cv2.CAP_PROP_FRAME_WIDTH)),
             int(src_video.get(cv2.CAP_PROP_FRAME_HEIGHT)))
-    fNUMS = src_video.get(cv2.CAP_PROP_FRAME_COUNT)
 
-
+    videoWriter = cv2.VideoWriter(
+        "output.mp4",
+        cv2.VideoWriter_fourcc(*"mp4v"),  # 编码器
+        fps,
+        size
+    )
 
     with torch.no_grad():
         model = model.eval()
