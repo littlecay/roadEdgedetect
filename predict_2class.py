@@ -158,7 +158,8 @@ def main():
 
                 # gray = cv2.cvtColor(pred_mask, cv2.COLOR_BGR2GRAY)
 
-                ret, binary = cv2.threshold(pred_mask, 0, 255, 0)
+                # ret, binary = cv2.threshold(pred_mask, 0, 255, 0)
+                binary = pred_mask * 255
                 contour, h = cv2.findContours(binary, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
 
                 for i in range(len(contour)):
