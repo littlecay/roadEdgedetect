@@ -134,7 +134,7 @@ def main():
     width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
     height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
     out = cv2.VideoWriter('output.mp4', fourcc, fps, (width, height))
-    pred_img = np.zeros((height, width, 3)).astype(np.uint8)
+    # pred_img = np.zeros((height, width, 3)).astype(np.uint8)
 
     with torch.no_grad():
         model = model.eval()
@@ -144,27 +144,28 @@ def main():
             # cv2.imshow('input', frame)
             if (ret):
                 img_ori = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-
+                img2 = img_ori.copy()
+                # img2 = frame.copy()
                 # for img_path in tqdm(image_files):
                 #     ext = os.path.basename(img_path).split('.')[-1]
                 #     img_name = os.path.basename(img_path)[:-len(ext)-1]
                 #     img = Image.open(img_path).convert('RGB')
                 img = transform(img_ori).unsqueeze(0) # To tensor of NCHW
                 # img = torch.from_numpy(img_ori).unsqueeze(0)
+                # img2 = img.squeeze(0).permute(1, 2, 0).numpy().copy()
                 img = img.to(device)
 
                 pred_mask = model(img).max(1)[1].cpu().numpy()[0] # HW
                 # colorized_preds = decode_fn(pred).astype('uint8')
-
                 binary = np.uint8(pred_mask * 255)
                 # gray = cv2.cvtColor(pred_mask, cv2.COLOR_BGR2GRAY)
-
+                # cv2.imshow('input', binary)
                 # ret, binary = cv2.threshold(np.uint8(pred_mask), 1, 255, 0)
 
                 contour, h = cv2.findContours(binary, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
 
                 for i in range(len(contour)):
-                    if cv2.contourArea(contour[i]) > 2000:
+                    if cv2.contourArea(contour[i]) > 8000:
                         approx = cv2.approxPolyDP(contour[i], 20, True)
                         img2 = cv2.drawContours(img2, [approx], 0, (255, 255, 255), 5)
                 out.write(img2)
