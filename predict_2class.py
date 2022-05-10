@@ -58,9 +58,9 @@ def get_argparser():
     parser.add_argument("--crop_size", type=int, default=513)
 
     
-    parser.add_argument("--ckpt", default='./checkpoints/best_deeplabv3plus_resnet50_cityscapes_os16.pth', type=str,
+    parser.add_argument("--ckpt", default='./checkpoints/best/best_deeplabv3plus_resnet50_UAS_os16.pth', type=str,
                         help="resume from checkpoint")
-    parser.add_argument("--gpu_id", type=str, default='0,1,2,3',
+    parser.add_argument("--gpu_id", type=str, default='0',
                         help="GPU ID")
     return parser
 
@@ -70,6 +70,9 @@ def main():
         opts.num_classes = 21
         decode_fn = VOCSegmentation.decode_target
     elif opts.dataset.lower() == 'cityscapes':
+        opts.num_classes = 2
+        decode_fn = Cityscapes.decode_target
+    elif opts.dataset.lower() == 'uas':
         opts.num_classes = 2
         decode_fn = Cityscapes.decode_target
 
@@ -130,7 +133,7 @@ def main():
     fps = int(round(cap.get(cv2.CAP_PROP_FPS)))
     width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
     height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-    out = cv2.VideoWriter('save_37.mp4', fourcc, fps, (width, height))
+    out = cv2.VideoWriter('output.mp4', fourcc, fps, (width, height))
     pred_img = np.zeros((height, width, 3)).astype(np.uint8)
 
     with torch.no_grad():
@@ -153,10 +156,21 @@ def main():
                 pred_mask = model(img).max(1)[1].cpu().numpy()[0] # HW
                 # colorized_preds = decode_fn(pred).astype('uint8')
 
-                for i in range(3):
-                    pred_img[:,:,i] = (img_ori[:,:,i] * pred_mask)
+                # gray = cv2.cvtColor(pred_mask, cv2.COLOR_BGR2GRAY)
 
-                out.write(pred_img)
+                ret, binary = cv2.threshold(pred_mask, 0, 255, 0)
+                contour, h = cv2.findContours(binary, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
+
+                for i in range(len(contour)):
+                    if cv2.contourArea(contour[i]) > 2000:
+                        approx = cv2.approxPolyDP(contour[i], 20, True)
+                        img2 = cv2.drawContours(img2, [approx], 0, (255, 255, 255), 5)
+                out.write(img2)
+                # for i in range(3):
+                #     pred_img[:,:,i] = (img_ori[:,:,i] * pred_mask)
+
+
+
 
             else:
                 break

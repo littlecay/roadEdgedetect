@@ -10,6 +10,8 @@ contour, h = cv2.findContours(binary, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
 
 for i in range(len(contour)):
     if cv2.contourArea(contour[i]) > 2000:
-        approx = cv2.approxPolyDP(contour[i], 0.005, True)
+        approx = cv2.approxPolyDP(contour[i], 20, True)
         img2 = cv2.drawContours(img2, [approx], 0, (255, 255, 255), 5)
-cv2.imwrite('cnt.png', img2)
+        # # approx = cv2.approxPolyDP(contour[i], 0.005, True)
+        # img2 = cv2.drawContours(img2, contour[i], 0, (255, 255, 255), 5)
+cv2.imwrite('cnt2.png', img2)
