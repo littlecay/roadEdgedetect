@@ -25,10 +25,10 @@ def get_argparser():
     parser = argparse.ArgumentParser()
 
     # Datset Options
-    parser.add_argument("--input", type=str, required=True,
+    parser.add_argument("--input", type=str, required=False,
                         help="path to a single image or image directory")
-    parser.add_argument("--dataset", type=str, default='voc',
-                        choices=['voc', 'cityscapes'], help='Name of training set')
+    parser.add_argument("--dataset", type=str, default='uas',
+                        choices=['voc', 'cityscapes', 'uas'], help='Name of training set')
 
     # Deeplab Options
     available_models = sorted(name for name in network.modeling.__dict__ if name.islower() and \
@@ -36,7 +36,7 @@ def get_argparser():
                               network.modeling.__dict__[name])
                               )
 
-    parser.add_argument("--model", type=str, default='deeplabv3plus_resnet101',
+    parser.add_argument("--model", type=str, default='deeplabv3plus_resnet50',
                         choices=available_models, help='model name')
     parser.add_argument("--separable_conv", action='store_true', default=True,
                         help="apply separable conv to decoder and aspp")
@@ -141,11 +141,27 @@ def main():
             _, frame = src_video.read()
             if frame is None:
                 break
-            img = transform(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)).unsqueeze(0) # To tensor of NCHW
+            img = transform(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)).unsqueeze(0)
+            img2 = img.copy()# To tensor of NCHW
             img = img.to(device)
 
             pred = model(img).max(1)[1].cpu().numpy()[0] # HW
-            colorized_preds = decode_fn(pred).astype('uint8')
+            gray = cv2.cvtColor(pred, cv2.COLOR_BGR2GRAY)
+            ret, binary = cv2.threshold(gray, 30, 255, 0)
+            contour, h = cv2.findContours(binary, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
+
+            for i in range(len(contour)):
+                if cv2.contourArea(contour[i]) > 2000:
+                    approx = cv2.approxPolyDP(contour[i], 0.005, True)
+                    img2 = cv2.drawContours(img2, [approx], 0, (255, 255, 255), 5)
+            # colorized_preds = decode_fn(pred).astype('uint8')
+                    videoWriter.write(img2)
+
+        src_video.release()
+        videoWriter.release()
+
+
+
 
 if __name__ == '__main__':
     main()
