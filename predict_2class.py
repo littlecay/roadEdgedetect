@@ -156,10 +156,11 @@ def main():
                 pred_mask = model(img).max(1)[1].cpu().numpy()[0] # HW
                 # colorized_preds = decode_fn(pred).astype('uint8')
 
+                binary = np.uint8(pred_mask * 255)
                 # gray = cv2.cvtColor(pred_mask, cv2.COLOR_BGR2GRAY)
 
-                # ret, binary = cv2.threshold(pred_mask, 0, 255, 0)
-                binary = pred_mask * 255
+                # ret, binary = cv2.threshold(np.uint8(pred_mask), 1, 255, 0)
+
                 contour, h = cv2.findContours(binary, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
 
                 for i in range(len(contour)):
