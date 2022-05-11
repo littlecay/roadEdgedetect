@@ -144,7 +144,8 @@ def main():
             # cv2.imshow('input', frame)
             if (ret):
                 img_ori = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-                img2 = img_ori.copy()
+                img2 = frame.copy()
+                # cv2.imshow('in', img_ori)
                 # img2 = frame.copy()
                 # for img_path in tqdm(image_files):
                 #     ext = os.path.basename(img_path).split('.')[-1]
@@ -165,15 +166,13 @@ def main():
                 contour, h = cv2.findContours(binary, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
 
                 for i in range(len(contour)):
-                    if cv2.contourArea(contour[i]) > 8000:
+                    if cv2.contourArea(contour[i]) > 10000:
                         approx = cv2.approxPolyDP(contour[i], 20, True)
                         img2 = cv2.drawContours(img2, [approx], 0, (255, 255, 255), 5)
+
                 out.write(img2)
                 # for i in range(3):
                 #     pred_img[:,:,i] = (img_ori[:,:,i] * pred_mask)
-
-
-
 
             else:
                 break
