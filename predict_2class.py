@@ -130,16 +130,22 @@ def main():
 
     fourcc = cv2.VideoWriter_fourcc(*'mp4v')
     # cap = cv2.VideoCapture('37b49c1476b7cf8b9f178ff65da433fc.mp4')
-    cap = cv2.VideoCapture('5ecd53ea81a4bb12d72eb58816a52a9c.mp4')
+    # cap = cv2.VideoCapture('5ecd53ea81a4bb12d72eb58816a52a9c.mp4')
     # cap = cv2.VideoCapture('b0978820161bbdb09240082277cc3347.mp4')
     # cap = cv2.VideoCapture('82698e5874ffb94ad2e8a338d0bd14bf.mp4')
+
+    cap = cv2.VideoCapture('564b395012c9fd6b12760760c68cc151.mp4')
+    # cap = cv2.VideoCapture('7222ffd0f2a4d703c1e0ee3530859450.mp4')
+    # cap = cv2.VideoCapture('379ec13d5ee90c73c9b556d80ea82f1f.mp4')
+    # cap = cv2.VideoCapture('2ee174dcf12542ac72f3c154589bf267.mp4')
+
     fps = int(round(cap.get(cv2.CAP_PROP_FPS)))
     width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
     height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-    out = cv2.VideoWriter('output_5ecd53ea81a4bb12d72eb58816a52a9c.mp4', fourcc, fps, (width, height))
-    # out = cv2.VideoWriter('output_82698e5874ffb94ad2e8a338d0bd14bf.mp4', fourcc, fps, (width, height))
-    # out = cv2.VideoWriter('output_b0978820161bbdb09240082277cc3347.mp4', fourcc, fps, (width, height))
-    # out = cv2.VideoWriter('output_37b49c1476b7cf8b9f178ff65da433fc.mp4', fourcc, fps, (width, height))
+    out = cv2.VideoWriter('output__564b395012c9fd6b12760760c68cc151.mp4', fourcc, fps, (width, height))
+    # out = cv2.VideoWriter('output_7222ffd0f2a4d703c1e0ee3530859450.mp4', fourcc, fps, (width, height))
+    # out = cv2.VideoWriter('output_379ec13d5ee90c73c9b556d80ea82f1f.mp4', fourcc, fps, (width, height))
+    # out = cv2.VideoWriter('output_2ee174dcf12542ac72f3c154589bf267.mp4', fourcc, fps, (width, height))
     # pred_img = np.zeros((height, width, 3)).astype(np.uint8)
 
     with torch.no_grad():
@@ -172,8 +178,8 @@ def main():
                 contour, h = cv2.findContours(binary, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
 
                 for i in range(len(contour)):
-                    if cv2.contourArea(contour[i]) > 20000:
-                        approx = cv2.approxPolyDP(contour[i], 20, True)
+                    if cv2.contourArea(contour[i]) > 80000:
+                        approx = cv2.approxPolyDP(contour[i], 1, True)
                         img2 = cv2.drawContours(img2, [approx], 0, (255, 255, 255), 5)
 
                 out.write(img2)
