@@ -245,7 +245,7 @@ def main():
         opts.num_classes = 21
     elif opts.dataset.lower() == 'cityscapes':
         opts.num_classes = 2
-    elif opts.dataset.lower() == 'UAS':
+    elif opts.dataset.lower() == 'uas':
         opts.num_classes = 2
 
     # Setup visualization

@@ -137,7 +137,8 @@ def main():
     # cap = cv2.VideoCapture('564b395012c9fd6b12760760c68cc151.mp4')
     # cap = cv2.VideoCapture('7222ffd0f2a4d703c1e0ee3530859450.mp4')
     # cap = cv2.VideoCapture('379ec13d5ee90c73c9b556d80ea82f1f.mp4')
-    cap = cv2.VideoCapture('2ee174dcf12542ac72f3c154589bf267.mp4')
+    # cap = cv2.VideoCapture('2ee174dcf12542ac72f3c154589bf267.mp4')
+    cap = cv2.VideoCapture('b734531cb875cc944ca663b5fa6a32c8.mp4')
 
     fps = int(round(cap.get(cv2.CAP_PROP_FPS)))
     width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
@@ -145,7 +146,8 @@ def main():
     # out = cv2.VideoWriter('output_564b395012c9fd6b12760760c68cc151.mp4', fourcc, fps, (width, height))
     # out = cv2.VideoWriter('output_7222ffd0f2a4d703c1e0ee3530859450.mp4', fourcc, fps, (width, height))
     # out = cv2.VideoWriter('output_379ec13d5ee90c73c9b556d80ea82f1f.mp4', fourcc, fps, (width, height))
-    out = cv2.VideoWriter('output_2ee174dcf12542ac72f3c154589bf267.mp4', fourcc, fps, (width, height))
+    # out = cv2.VideoWriter('output_2ee174dcf12542ac72f3c154589bf267.mp4', fourcc, fps, (width, height))
+    out = cv2.VideoWriter('output_b734531cb875cc944ca663b5fa6a32c8_cler.mp4', fourcc, fps, (width, height))
     # pred_img = np.zeros((height, width, 3)).astype(np.uint8)
 
     with torch.no_grad():
@@ -171,11 +173,16 @@ def main():
                 pred_mask = model(img).max(1)[1].cpu().numpy()[0] # HW
                 # colorized_preds = decode_fn(pred).astype('uint8')
                 binary = np.uint8(pred_mask * 255)
+                kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (20, 20))
+                morph_img = cv2.morphologyEx(binary, cv2.MORPH_CLOSE, kernel)
+                kn = np.ones((3, 3), dtype=np.uint8)
+                morph_img = cv2.erode(morph_img, kn)
+                # morph_img = cv2.morphologyEx(binary, cv2.MORPH_OPEN, kernel)
                 # gray = cv2.cvtColor(pred_mask, cv2.COLOR_BGR2GRAY)
                 # cv2.imshow('input', binary)
                 # ret, binary = cv2.threshold(np.uint8(pred_mask), 1, 255, 0)
 
-                contour, h = cv2.findContours(binary, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
+                contour, h = cv2.findContours(morph_img, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
 
                 max = 0
                 for i in range(len(contour)):
